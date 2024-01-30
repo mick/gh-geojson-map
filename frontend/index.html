@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html class="h-full bg-white">
+  <head>
+    <meta charset="utf-8" />
+    <title>Github GeoJSON Explorer</title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <script src='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js'></script>
+    <link href='https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css' rel='stylesheet' />
+    <link href='/static/output.css' rel='stylesheet' />
+  </head>
+  <body class="h-full">
+    <div x-data="main" class="h-full">
+  <div class="relative h-full w-[300px] z-10" role="dialog" aria-modal="true" x-show="sidebar">
+      <div class="relative mr-16 flex w-full h-full max-w-xs flex-1">
+        <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
+          <button type="button" class="-m-2.5 p-2.5" @click="toggleSidebar()">
+            <span class="sr-only">Close sidebar</span>
+            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+
+        <div class="flex grow flex-col gap-y-5 overflow-y-auto overflow-x-clip bg-white px-6 pb-2 h-full">
+          <p class="font-semibold">Features:</p>
+          <nav class="flex flex-1 flex-col">
+            <ul role="list" class="flex flex-1 flex-col gap-y-7">
+              <template x-for="feat in features">
+              <li @mouseover.debounce="highlight(feat.id)" :class="highlightFeatureID == feat.id ? 'bg-gray-200 ' : 'bg-gray-50 '" class="overflow-x-clip">
+                  <span class="flex h-6 shrink-0 items-center justify-center rounded-lg border text-[0.625rem] font-medium bg-white text-gray-400 border-gray-200 group-hover:border-indigo-600 group-hover:text-indigo-600" x-text="feat.geomType"></span>
+
+                  <a :href="'https://github.com/' + feat.repos[0] + '/blob/-/' + feat.paths[0]" target="_blank" class="text-indigo-600 group flex gap-x-3 rounded-md p-2 text-sm leading-6" :class="highlightFeatureID == feat.id ? 'font-bold' : 'font-semibold'">
+                    <span x-text="feat.repos[0] +'/'+ feat.paths[0]"></span>
+                  </a>
+                  <p x-text="feat.area"></p>
+                  <details x-show="feat.repos.length > 1">
+                    <summary>
+                      <span class="text-gray-500">Found in <span class="font-bold" x-text="feat.repos.length -1"></span> other files</span>
+                    </summary>
+                    <template x-for="(repo, idx) in feat.repos.slice(1)">
+                      <a :href="'https://github.com/' + repo + '/blob/-/' + feat.paths[idx]" :title="'https://github.com/' + repo + '/blob/-/' + feat.paths[idx]" target="_blank" class="text-indigo-600 group flex gap-x-3 rounded-md p-2 text-sm leading-6" :class="highlightFeatureID == feat.id ? 'font-bold' : 'font-semibold'">
+                        <span x-text="repo +'/'+ feat.paths[idx]"></span>
+                      </a>
+                    </template>
+                  </details>
+
+
+
+              </li>
+              </template>
+            </ul>
+          </nav>
+        </div>
+      </div>
+  </div>
+
+      <button type="button" class="z-50 m-2 fixed text-white" @click="toggleSidebar()" x-show="!sidebar">
+        <span class="sr-only">Open sidebar</span>
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+        </svg>
+      </button>
+
+
+      <main class="">
+        <div class="">
+          <div id="map"></div>
+        </div>
+      </main>
+    </div>
+    <script src="/static/bundle.js"></script>
+  </body>
+</html>

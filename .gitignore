@@ -1,0 +1,7 @@
+dist/
+node_modules/
+*.duckdb
+*.wal
+data/
+frontend/static/
+notes.md
