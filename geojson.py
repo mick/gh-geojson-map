@@ -2,14 +2,11 @@ import json
 import sys
 import math
 import duckdb
-from duckdb.typing import VARCHAR, BLOB, INTEGER
+from duckdb.typing import VARCHAR
 import shapely
 from shapely.geometry import shape, box
 from pyproj import Geod
 from pathlib import Path
-from supermercado import burntiles
-from supermercado import super_utils
-import mercantile
 
 geod = Geod(ellps="WGS84")
 
@@ -122,37 +119,16 @@ def extract_valid_features(geojson:str) -> str | None:
     return json.dumps(valid_features)
 
 
-def tile_cover(rawgeom:bytes, zoom:int) ->str | None:
-    geom = shapely.from_wkb(rawgeom)
-    feat = {
-        'type': 'Feature',
-        'geometry': geom.__geo_interface__,
-        'properties': {},
-    }
-    features = [f for f in super_utils.filter_features([feat])]
-    try:
-        tiles = burntiles.burn(features, zoom)
-    except Exception as e:
-        # print(f"Failed to burn tiles: {e}")
-        # print(feat)
-        return None
-
-    tilelist = []
-
-    for t in tiles:
-        tilelist.append(mercantile.quadkey(t))
-
-    return json.dumps(tilelist)
-
 
 def main() ->None:
+    # km2
+    large_geom_size = 1_000_000_000
 
     con = duckdb.connect(database='github-geojson.duckdb', read_only=False)
     con.install_extension('spatial')
     con.load_extension('spatial')
     con.execute("PRAGMA enable_progress_bar")
     con.create_function("extract_geojson", extract_valid_features, [VARCHAR], VARCHAR)
-    con.create_function("tile_cover", tile_cover, [BLOB, INTEGER], VARCHAR)
 
     [_, features_output_file_path] = sys.argv
 
@@ -181,13 +157,10 @@ def main() ->None:
         extract_geojson AS (
             SELECT
             json_array_length(json(extract_geojson(content))) as feature_count,
-            json_structure(json(extract_geojson(content))) as structure,
             repo_name, path, unnest(json_extract_string(extract_geojson(content), '$[*]')) as geojson
             FROM github_contents
         )
     """
-    # km2
-    large_geom_size = 1_000_000_000
 
     query_base = f"""
             WITH {github_contents_cte},

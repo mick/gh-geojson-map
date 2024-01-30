@@ -1,6 +1,6 @@
 ## Github GeoJSON MAP
 
-Also see blog post about this here: XXXXXXXXXXXX
+Also see blog post about this here: https://mick.im/post/2024-01-github-geojson
 
 This repo contains a script that process GitHub GeoJSON file contents from BigQuery to prepare it to be tiled and visualized on a map.
 
@@ -43,4 +43,4 @@ In a future where tippecanoe can read geoparquet files and duckdb can write geop
 
 Now with pmtiles files, those can be served with the pmtiles cli or on cloudflare workers.
 
-You can see this in action at XXXXXXXXXXX
+You can see this in action at https://mick.github.io/gh-geojson-map/
